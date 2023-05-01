@@ -1,5 +1,6 @@
 import logging
 from typing import List
+import numpy as np
 
 import spotipy
 from plexapi.server import PlexServer
@@ -9,7 +10,7 @@ from .plex import update_or_create_plex_playlist
 
 
 def _get_sp_user_playlists(
-    sp: spotipy.Spotify, user_id: str, suffix: str = " - Spotify"
+    sp: spotipy.Spotify, userInputs: UserInputs, suffix: str = " - Spotify"
 ) -> List[Playlist]:
     """Get metadata for playlists in the given user_id.
 
@@ -23,8 +24,87 @@ def _get_sp_user_playlists(
     playlists = []
 
     try:
-        sp_playlists = sp.user_playlists(user_id)
-        for playlist in sp_playlists["items"]:
+
+        # test = sp.categories('GB')
+        # test = sp.current_user_saved_tracks()
+        # a = sp.categories(country='GB')
+
+        all_playlists = []
+
+        spotify_playlists = []
+        if userInputs.spotify_playlist_ids:
+            spotify_playlists = userInputs.spotify_playlist_ids.split()
+
+        playlists_from_list = []
+        for pid in spotify_playlists:
+            p = sp.playlist(playlist_id=pid, market='GB')
+            playlists_from_list.append(p)
+
+        if len(spotify_playlists) > 0:
+            all_playlists = np.concatenate((all_playlists, playlists_from_list))
+
+        if "throw" in userInputs.spotify_categories:
+            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFN2GMExExvrS")['playlists']['items']
+            all_playlists = np.concatenate((all_playlists, category_playlists))
+
+        if "featured" in userInputs.spotify_categories:
+            category_playlists = sp.featured_playlists(country="GB")
+            all_playlists = np.concatenate((all_playlists, category_playlists))
+
+        if "top" in userInputs.spotify_categories:
+            category_playlists = sp.category_playlists(category_id="toplists")['playlists']['items']
+            all_playlists = np.concatenate((all_playlists, category_playlists))
+
+        if "hiphop" in userInputs.spotify_categories:
+            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFQ00XGBls6ym")['playlists']['items']
+            all_playlists = np.concatenate((all_playlists, category_playlists))
+
+        if "indie" in userInputs.spotify_categories:
+            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFCWjUTdzaG0e")['playlists']['items']
+            all_playlists = np.concatenate((all_playlists, category_playlists))
+
+        if "mood" in userInputs.spotify_categories:
+            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFzHmL4tf05da")['playlists']['items']
+            all_playlists = np.concatenate((all_playlists, category_playlists))
+
+        if "party" in userInputs.spotify_categories:
+            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFA6SOHvT3gck")['playlists']['items']
+            all_playlists = np.concatenate((all_playlists, category_playlists))
+
+        if "dance" in userInputs.spotify_categories:
+            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFHOzuVTgTizF")['playlists']['items']
+            all_playlists = np.concatenate((all_playlists, category_playlists))
+
+        if "pop" in userInputs.spotify_categories:
+            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFEC4WFtoNRpw")['playlists']['items']
+            all_playlists = np.concatenate((all_playlists, category_playlists))
+
+        if "rnb" in userInputs.spotify_categories:
+            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFEZPnFQSFB1T")['playlists']['items']
+            all_playlists = np.concatenate((all_playlists, category_playlists))
+
+        if "rock" in userInputs.spotify_categories:
+            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFDXXwE9BDJAr")['playlists']['items']
+            all_playlists = np.concatenate((all_playlists, category_playlists))
+
+        if "home" in userInputs.spotify_categories:
+            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFx0uLQR2okcc")['playlists']['items']
+            all_playlists = np.concatenate((all_playlists, category_playlists))
+
+        # featured_playlist_ids = list(
+        #     map(lambda x: x['id'], featured_playlist_items))
+
+        # playlists_from_list = []
+        # for pid in spotify_playlists:
+        #     if pid not in featured_playlist_ids:
+        #         p = sp.playlist(playlist_id=pid, market='GB')
+        #         playlists_from_list.append(p)
+
+        # logging.info(all_playlists)
+        # sp_playlists1 = sp.category_playlists('toplists', 'GB')
+        # for playlist in sp_playlists1["playlists"]["items"]:
+
+        for playlist in all_playlists:
             playlists.append(
                 Playlist(
                     id=playlist["uri"],
@@ -98,8 +178,8 @@ def spotify_playlist_sync(
     """
     playlists = _get_sp_user_playlists(
         sp,
-        userInputs.spotify_user_id,
-        " - Spotify" if userInputs.append_service_suffix else "",
+        userInputs,
+        " - Spotify" if userInputs.append_service_suffix else ""
     )
     if playlists:
         for playlist in playlists:

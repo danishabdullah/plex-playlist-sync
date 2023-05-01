@@ -6,6 +6,7 @@ import deezer
 import spotipy
 from plexapi.server import PlexServer
 from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyOAuth
 
 from utils.deezer import deezer_playlist_sync
 from utils.helperClasses import UserInputs
@@ -15,6 +16,8 @@ from utils.spotify import spotify_playlist_sync
 userInputs = UserInputs(
     plex_url=os.getenv("PLEX_URL"),
     plex_token=os.getenv("PLEX_TOKEN"),
+    plex_token_others=os.getenv("PLEX_TOKEN_USERS"),
+    plex_min_songs=int(os.getenv("PLEX_MIN_SONGS", 10)),
     write_missing_as_csv=os.getenv("WRITE_MISSING_AS_CSV", "0") == "1",
     append_service_suffix=os.getenv("APPEND_SERVICE_SUFFIX", "1") == "1",
     add_playlist_poster=os.getenv("ADD_PLAYLIST_POSTER", "1") == "1",
@@ -24,9 +27,13 @@ userInputs = UserInputs(
     spotipy_client_id=os.getenv("SPOTIFY_CLIENT_ID"),
     spotipy_client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
     spotify_user_id=os.getenv("SPOTIFY_USER_ID"),
-    deezer_user_id=os.getenv("DEEZER_USER_ID"),
-    deezer_playlist_ids=os.getenv("DEEZER_PLAYLIST_ID"),
+    spotify_redirect_uri=os.getenv("SPOTIFY_REDIRECT_URI"),
+    spotify_playlist_ids=os.getenv("SPOTIFY_PLAYLIST_IDS"),
+    spotify_categories=os.getenv("SPOTIFY_CATEGORIES"),
 )
+
+scope = "user-library-read playlist-read-private user-follow-read"
+
 while True:
     logging.info("Starting playlist sync")
 
@@ -47,17 +54,17 @@ while True:
     SP_AUTHSUCCESS = False
 
     if (
-        userInputs.spotipy_client_id
-        and userInputs.spotipy_client_secret
-        and userInputs.spotify_user_id
+            userInputs.spotipy_client_id
+            and userInputs.spotipy_client_secret
+            and userInputs.spotify_user_id
     ):
         try:
-            sp = spotipy.Spotify(
-                auth_manager=SpotifyClientCredentials(
-                    userInputs.spotipy_client_id,
-                    userInputs.spotipy_client_secret,
-                )
-            )
+            sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
+                client_id=userInputs.spotipy_client_id,
+                client_secret=userInputs.spotipy_client_secret,
+                redirect_uri=userInputs.spotify_redirect_uri,
+                scope=scope
+            ))
             SP_AUTHSUCCESS = True
         except:
             logging.info("Spotify Authorization error, skipping spotify sync")
@@ -75,12 +82,12 @@ while True:
 
     ########## DEEZER SYNC ##########
 
-    logging.info("Starting Deezer playlist sync")
-    dz = deezer.Client()
-    deezer_playlist_sync(dz, plex, userInputs)
-    logging.info("Deezer playlist sync complete")
-
-    logging.info("All playlist(s) sync complete")
-    logging.info("sleeping for %s seconds" % userInputs.wait_seconds)
+    # logging.info("Starting Deezer playlist sync")
+    # dz = deezer.Client()
+    # deezer_playlist_sync(dz, plex, userInputs)-
+    # logging.info("Deezer playlist sync complete")
+    #
+    # logging.info("All playlist(s) sync complete")
+    # logging.info("sleeping for %s seconds" % userInputs.wait_seconds)
 
     time.sleep(userInputs.wait_seconds)
