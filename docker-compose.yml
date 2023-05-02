@@ -1,24 +1,23 @@
----
 version: "2.1"
 services:
   playlistSync:
-    image: rnagabhyrava/plexplaylistsync:latest
+    image: dregsozworld/plex_playlist_sync
     container_name: playlistSync
-    # optional only if you chose WRITE_MISSING_AS_CSV=1 in env
+
     volumes:
-      - <Path where you want to write missing tracks>:/data
+      - <directory where csv stored>:/data
     environment:
-      - PLEX_URL= <your local plex url>
-      - PLEX_TOKEN=<your plex token>
-      - WRITE_MISSING_AS_CSV=<1 or 0> # Default 0, 1 = writes missing tracks from each playlist to a csv
-      - APPEND_SERVICE_SUFFIX=<1 or 0> # Default 1, 1 = appends the service name to the playlist name
-      - ADD_PLAYLIST_POSTER=<1 or 0> # Default 1, 1 = add poster for each playlist
-      - ADD_PLAYLIST_DESCRIPTION=<1 or 0> # Default 1, 1 = add description for each playlist
-      - APPEND_INSTEAD_OF_SYNC=0 # Default 0, 1 = Sync tracks, 0 = Append only
-      - SECONDS_TO_WAIT=84000
-      - SPOTIFY_CLIENT_ID=<your spotify client id>
-      - SPOTIFY_CLIENT_SECRET=<your spotify client secret>
-      - SPOTIFY_USER_ID=<your spotify user id>
+      - PLEX_URL= <Your local plex url>
+      - PLEX_TOKEN=<Your token>
+      - WRITE_MISSING_AS_CSV=<1 | 0 >
+      - APPEND_SERVICE_SUFFIX= <1 | 0>
+      - ADD_PLAYLIST_POSTER= ><1 | 0 >
+      - ADD_PLAYLIST_DESCRIPTION= < 1 | 0 >
+      - APPEND_INSTEAD_OF_SYNC= <1 | 0 >
+      - SECONDS_TO_WAIT=43200  #12 Hours Default
+      - SPOTIFY_CLIENT_ID= <Your ID>
+      - SPOTIFY_CLIENT_SECRET= <Your Secret>
+      - SPOTIFY_USER_ID= <Your ID / Username >
       - DEEZER_USER_ID=<your spotify user id>
-      - DEEZER_PLAYLIST_ID= #<deezer playlist ids space seperated>
+      - DEEZER_PLAYLIST_ID= # multiple playlists are space separated
     restart: unless-stopped

@@ -1,12 +1,13 @@
 import csv
 import logging
+import os.path
 import pathlib
 import sys
 from difflib import SequenceMatcher
 from typing import List
 
 import plexapi
-from plexapi.exceptions import BadRequest, NotFound
+from plexapi.exceptions import BadRequest, NotFound, Unauthorized
 from plexapi.server import PlexServer
 
 from .helperClasses import Playlist, Track, UserInputs
@@ -27,7 +28,7 @@ def _write_csv(tracks: List[Track], name: str, path: str = "/data") -> None:
     data_folder = pathlib.Path(path)
     data_folder.mkdir(parents=True, exist_ok=True)
     file = data_folder / f"{name}.csv"
-
+    logging.info(f"Creating {file}")
     with open(file, "w", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(Track.__annotations__.keys())
@@ -45,11 +46,13 @@ def _delete_csv(name: str, path: str = "/data") -> None:
         path (str, optional): Root directory to delete the file from
     """
     data_folder = pathlib.Path(path)
+    logging.info(os.listdir(data_folder))
     file = data_folder / f"{name}.csv"
+    logging.info(f"{str(file)} Exists: {os.path.exists(file)}")
     file.unlink()
 
 
-def _get_available_plex_tracks(plex: PlexServer, tracks: List[Track]) -> List:
+def _get_available_plex_tracks(plex: PlexServer, tracks: List[Track]) -> (List[Track], List[Track]):
     """Search and return list of tracks available in plex.
 
     Args:
@@ -57,24 +60,28 @@ def _get_available_plex_tracks(plex: PlexServer, tracks: List[Track]) -> List:
         tracks (List[Track]): list of track objects
 
     Returns:
-        List: of plex track objects
+        Tuple containing:
+            List of Tracks that are stored in Plex
+            List of Tracks which are not
     """
     plex_tracks, missing_tracks = [], []
     for track in tracks:
         search = []
         try:
             search = plex.search(track.title, mediatype="track", limit=5)
+        except NotFound:
+            logging.info(f"{track.title} not found on plex server")
         except BadRequest:
-            logging.info("failed to search %s on plex", track.title)
+            logging.info(f"failed to search {track.title} on plex")
         if (not search) or len(track.title.split("(")) > 1:
             logging.info("retrying search for %s", track.title)
             try:
                 search += plex.search(
                     track.title.split("(")[0], mediatype="track", limit=5
                 )
-                logging.info("search for %s successful", track.title)
+                logging.info(f"search for {track.title} successful")
             except BadRequest:
-                logging.info("unable to query %s on plex", track.title)
+                logging.info(f"unable to query {track.title} on plex")
 
         found = False
         if search:
@@ -99,11 +106,7 @@ def _get_available_plex_tracks(plex: PlexServer, tracks: List[Track]) -> List:
                         break
 
                 except IndexError:
-                    logging.info(
-                        "Looks like plex mismatched the search for %s,"
-                        " retrying with next result",
-                        track.title,
-                    )
+                    logging.info(f"Looks like plex mismatched {track.title}, retrying with next result")
         if not found:
             missing_tracks.append(track)
 
@@ -138,72 +141,73 @@ def update_or_create_plex_playlist(
     plex: PlexServer,
     playlist: Playlist,
     tracks: List[Track],
-    userInputs: UserInputs,
+    user_inputs: UserInputs,
 ) -> None:
     """Update playlist if exists, else create a new playlist.
 
     Args:
+        user_inputs: User entered Environment Vars
+        tracks: (List): List of plex.audio.track objects
         plex (PlexServer): A configured PlexServer instance
-        available_tracks (List): List of plex.audio.track objects
         playlist (Playlist): Playlist object
     """
     available_tracks, missing_tracks = _get_available_plex_tracks(plex, tracks)
-    if available_tracks:
+    if available_tracks:  # Set up playlist with Tracks
         try:
             plex_playlist = _update_plex_playlist(
                 plex=plex,
                 available_tracks=available_tracks,
                 playlist=playlist,
-                append=userInputs.append_instead_of_sync,
+                append=user_inputs.append_instead_of_sync,
             )
-            logging.info("Updated playlist %s", playlist.name)
+            logging.info(f"Updated playlist {playlist.name}")
         except NotFound:
             plex.createPlaylist(title=playlist.name, items=available_tracks)
-            logging.info("Created playlist %s", playlist.name)
+            logging.info(f"Created playlist  {playlist.name}")
             plex_playlist = plex.playlist(playlist.name)
 
-        if playlist.description and userInputs.add_playlist_description:
+        if playlist.description and user_inputs.add_playlist_description:
             try:
                 plex_playlist.edit(summary=playlist.description)
-            except:
-                logging.info(
-                    "Failed to update description for playlist %s",
-                    playlist.name,
-                )
-        if playlist.poster and userInputs.add_playlist_poster:
+            except (Unauthorized, NotFound, BadRequest) as e:
+                logging.info(f"Failed to update description for playlist {playlist.name}")
+                logging.exception(e)
+            except Exception as e:
+                logging.error(f"Unhandled Exception: {e}")
+
+        if playlist.poster and user_inputs.add_playlist_poster:
             try:
                 plex_playlist.uploadPoster(url=playlist.poster)
-            except:
-                logging.info(
-                    "Failed to update poster for playlist %s", playlist.name
-                )
-        logging.info(
-            "Updated playlist %s with summary and poster", playlist.name
-        )
+            except (Unauthorized, NotFound, BadRequest) as e:
+                logging.info(f"Failed to update poster for playlist {playlist.name}")
+                logging.warning(str(e))
+            except Exception as e:
+                logging.exception(e)
+
+        logging.info(f"Updated playlist {playlist.name} with summary and poster")
 
     else:
-        logging.info(
-            "No songs for playlist %s were found on plex, skipping the"
-            " playlist creation",
-            playlist.name,
-        )
-    if missing_tracks and userInputs.write_missing_as_csv:
+        logging.info(f"No songs for playlist {playlist.name} were found on plex, skipping the playlist creation")
+
+    if missing_tracks and user_inputs.write_missing_as_csv:  # Write needed songs to CSV file
         try:
             _write_csv(missing_tracks, playlist.name)
-            logging.info("Missing tracks written to %s.csv", playlist.name)
-        except:
-            logging.info(
-                "Failed to write missing tracks for %s, likely permission"
-                " issue",
-                playlist.name,
-            )
-    if (not missing_tracks) and userInputs.write_missing_as_csv:
+            logging.info(f"Missing tracks written to {playlist.name}.csv")
+        except OSError as e:
+            logging.info(f"Failed to write missing tracks for {playlist.name}, likely permission issue")
+            logging.warning(str(e))
+        except Exception as e:
+            logging.exception(e)
+    if (not missing_tracks) and user_inputs.write_missing_as_csv:
         try:
             # Delete playlist created in prev run if no tracks are missing now
-            _delete_csv(playlist.name)
-            logging.info("Deleted old %s.csv", playlist.name)
-        except:
-            logging.info(
-                "Failed to delete %s.csv, likely permission issue",
-                playlist.name,
-            )
+            if os.path.exists(pathlib.Path('/data') / (playlist.name + '.csv')):
+                _delete_csv(playlist.name)
+                logging.info(f"Deleted old {playlist.name}")
+            else:
+                logging.info(f"{playlist.name + '.csv'} does not exist in /data")
+        except OSError as e:
+            logging.info(f"Failed to delete {playlist.name}.csv, likely permission issue")
+            logging.warning(str(e))
+        except Exception as e:
+            logging.exception(e)

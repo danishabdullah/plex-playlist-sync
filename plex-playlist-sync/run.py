@@ -20,7 +20,7 @@ userInputs = UserInputs(
     add_playlist_poster=os.getenv("ADD_PLAYLIST_POSTER", "1") == "1",
     add_playlist_description=os.getenv("ADD_PLAYLIST_DESCRIPTION", "1") == "1",
     append_instead_of_sync=os.getenv("APPEND_INSTEAD_OF_SYNC", False) == "1",
-    wait_seconds=int(os.getenv("SECONDS_TO_WAIT", 86400)),
+    wait_seconds=int(os.getenv("SECONDS_TO_WAIT", 43200)),
     spotipy_client_id=os.getenv("SPOTIFY_CLIENT_ID"),
     spotipy_client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
     spotify_user_id=os.getenv("SPOTIFY_USER_ID"),
@@ -32,9 +32,10 @@ while True:
 
     if userInputs.plex_url and userInputs.plex_token:
         try:
-            plex = PlexServer(userInputs.plex_url, userInputs.plex_token)
-        except:
+            plex = PlexServer(userInputs.plex_url, userInputs.plex_token, timeout=60)
+        except Exception as e:
             logging.error("Plex Authorization error")
+            logging.exception(e)
             break
     else:
         logging.error("Missing Plex Authorization Variables")
