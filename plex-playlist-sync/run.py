@@ -12,6 +12,17 @@ from utils.deezer import deezer_playlist_sync
 from utils.helperClasses import UserInputs
 from utils.spotify import spotify_playlist_sync
 
+def start_local_http_server(port, handler=spotipy.oauth2.RequestHandler):
+    server = spotipy.oauth2.HTTPServer(("0.0.0.0", port), handler)
+    server.allow_reuse_address = True
+    server.auth_code = None
+    server.auth_token_form = None
+    server.error = None
+    return server
+
+spotipy.oauth2.start_local_http_server = start_local_http_server
+
+
 # Read ENV variables
 userInputs = UserInputs(
     plex_url=os.getenv("PLEX_URL"),
@@ -27,7 +38,6 @@ userInputs = UserInputs(
     spotipy_client_id=os.getenv("SPOTIFY_CLIENT_ID"),
     spotipy_client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
     spotify_user_id=os.getenv("SPOTIFY_USER_ID"),
-    spotify_redirect_uri=os.getenv("SPOTIFY_REDIRECT_URI"),
     spotify_playlist_ids=os.getenv("SPOTIFY_PLAYLIST_IDS"),
     spotify_categories=os.getenv("SPOTIFY_CATEGORIES"),
 )
@@ -59,11 +69,9 @@ while True:
             and userInputs.spotify_user_id
     ):
         try:
-            sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
+            sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
                 client_id=userInputs.spotipy_client_id,
                 client_secret=userInputs.spotipy_client_secret,
-                redirect_uri=userInputs.spotify_redirect_uri,
-                scope=scope
             ))
             SP_AUTHSUCCESS = True
         except:

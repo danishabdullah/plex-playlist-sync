@@ -16,6 +16,7 @@ This DOES NOT download any songs from anywhere.
 - Ability to copy playlists to multiple managed plex users
 - Add Spotify items by their IDs
 - Option to add playlist by their Spotify categories
+- Improved song matching
 - **Removed Deezer integration for now** go to original project for this
 
 
@@ -38,6 +39,8 @@ Copy that and add it to the docker `PLEX_TOKEN_USERS` variable.
 ### Spotify playlist categories
 
 In addition to adding playlists by their IDs, you can use the categories Spotify define and maintain. For example spotify have a category called "top" which will include playlists like "Global top 50", "Official Charts". Rock will include "Rocktail hour", "Rock Party" etc. Throwback will include "Born in the 90s", "Throwback Thursday". It keeps the playlists fresh and dynamic.
+
+** Warning - Each category can contain around 20 playlists **
 
 The values to use are below:
 

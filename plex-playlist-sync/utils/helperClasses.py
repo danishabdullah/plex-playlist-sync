@@ -35,7 +35,6 @@ class UserInputs:
     spotify_user_id: str
     spotify_playlist_ids: str
     # spotify_user_id_others: str
-    spotify_redirect_uri: str
     spotify_categories: str
     plex_min_songs: int
 
