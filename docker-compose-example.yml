@@ -1,16 +1,16 @@
 ---
 version: "2.1"
 services:
-  playlistSync:
+  playlist-sync:
     image: silkychap/plex-playlist-sync:latest
-    container_name: playlistSync
+    container_name: playlist-sync
     volumes:
       - ~/missing_tracks:/data
     environment:
       - PLEX_URL=http://192.99.99.99:32400
       - PLEX_TOKEN=qwertyuiop # Owners/Primary user's plex token
-      - plex_token_others=qwertyuiop qwertyuiop # Other managed user's plex tokens
-      - plex_min_songs=20 # Minimum number of songs for a playlist to be created
+      - PLEX_TOKEN_USERS=qwertyuiop qwertyuiop # Other managed user's plex tokens
+      - PLEX_MIN_SONGS=20 # Minimum number of songs for a playlist to be created
       - WRITE_MISSING_AS_CSV=1 # If you want to write missing
       - APPEND_SERVICE_SUFFIX=1 # If you want to append service name to playlist name (e.g., " - Spotify")
       - ADD_PLAYLIST_POSTER=1 # If you want to add posters for playlists

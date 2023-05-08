@@ -80,8 +80,8 @@ services:
     environment:
       - PLEX_URL= <your local plex url>
       - PLEX_TOKEN=<your plex token> # Owners/Primary user's plex token
-      - plex_token_others=<managed plex tokens> # Other managed user's plex tokens
-      - plex_min_songs=<min songs number per playlist> # Minimum number of songs for a playlist to be created
+      - PLEX_TOKEN_USERS=<managed plex tokens> # Other managed user's plex tokens
+      - PLEX_MIN_SONGS=<min songs number per playlist> # Minimum number of songs for a playlist to be created
       - WRITE_MISSING_AS_CSV=<1 or 0> # Default 0, 1 = writes missing tracks from each playlist to a csv
       - APPEND_SERVICE_SUFFIX=<1 or 0> # Default 1, 1 = appends the service name to the playlist name
       - ADD_PLAYLIST_POSTER=<1 or 0> # Default 1, 1 = add poster for each playlist

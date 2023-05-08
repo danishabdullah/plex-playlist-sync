@@ -4,6 +4,7 @@ import pathlib
 import sys
 from difflib import SequenceMatcher
 from typing import List
+import time
 from urllib.parse import quote_plus
 import re
 
@@ -188,10 +189,11 @@ def _get_available_plex_tracks(plex: PlexServer, tracks: List[Track]) -> List:
                         " retrying with next result",
                         track.title,
                     )
-        # break
         if not found:
             logging.error("%s | not found", track)
             missing_tracks.append(track)
+        # else:
+        #     break
 
     return plex_tracks, missing_tracks
 
@@ -236,17 +238,19 @@ def update_or_create_plex_playlist(
     available_tracks, missing_tracks = _get_available_plex_tracks(plex, tracks)
 
     plex_users = [plex]
-    plex_other_ids = userInputs.plex_token_others.split()
 
-    # Add other users if provided
-    if userInputs.plex_url and userInputs.plex_token and len(plex_other_ids) > 0:
-        for plex_id in plex_other_ids:
-            try:
-                plex_other = PlexServer(
-                    userInputs.plex_url, plex_id)
-                plex_users.append(plex_other)
-            except:
-                logging.error("Plex Authorization error for other users")
+    if userInputs.plex_token_others:
+        plex_other_ids = userInputs.plex_token_others.split()
+        # Add other users if provided
+        if userInputs.plex_url and userInputs.plex_token and len(plex_other_ids) > 0:
+            for plex_id in plex_other_ids:
+                time.sleep(1)
+                try:
+                    plex_other = PlexServer(
+                        userInputs.plex_url, plex_id)
+                    plex_users.append(plex_other)
+                except:
+                    logging.error("Plex Authorization error for other users")
 
     for p in plex_users:
         if p is None:
@@ -286,7 +290,7 @@ def update_or_create_plex_playlist(
                         "Failed to update poster for playlist %s", playlist.name
                     )
             logging.info(
-                "Updated playlist %s with summary and poster", playlist.name
+                "Updated playlist %s with summary and poster", playlist.name,
             )
 
         else:
@@ -295,23 +299,24 @@ def update_or_create_plex_playlist(
                 " playlist creation",
                 playlist.name,
             )
-        if missing_tracks and userInputs.write_missing_as_csv:
-            try:
-                _write_csv(missing_tracks, playlist.name)
-                logging.info("Missing tracks written to %s.csv", playlist.name)
-            except:
-                logging.info(
-                    "Failed to write missing tracks for %s, likely permission"
-                    " issue",
-                    playlist.name,
-                )
-        if (not missing_tracks) and userInputs.write_missing_as_csv:
-            try:
-                # Delete playlist created in prev run if no tracks are missing now
-                _delete_csv(playlist.name)
-                logging.info("Deleted old %s.csv", playlist.name)
-            except:
-                logging.info(
-                    "Failed to delete %s.csv, likely permission issue",
-                    playlist.name,
-                )
+    if missing_tracks and userInputs.write_missing_as_csv:
+        try:
+            _write_csv(missing_tracks, playlist.name)
+            logging.info("Missing tracks written to %s.csv", playlist.name)
+        except:
+            logging.info(
+                "Failed to write missing tracks for %s, likely permission"
+                " issue",
+                playlist.name,
+            )
+
+    if (not missing_tracks) and userInputs.write_missing_as_csv:
+        try:
+            # Delete playlist created in prev run if no tracks are missing now
+            _delete_csv(playlist.name)
+            logging.info("Deleted old %s.csv", playlist.name)
+        except:
+            logging.info(
+                "Failed to delete %s.csv, likely permission issue",
+                playlist.name,
+            )

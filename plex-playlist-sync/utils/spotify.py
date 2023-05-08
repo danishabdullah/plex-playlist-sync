@@ -1,6 +1,6 @@
 import logging
+import time
 from typing import List
-# import numpy as np
 
 import spotipy
 from plexapi.server import PlexServer
@@ -43,56 +43,60 @@ def _get_sp_user_playlists(
         if len(spotify_playlists) > 0:
             all_playlists = all_playlists + playlists_from_list
 
-        if "throw" in userInputs.spotify_categories:
-            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFN2GMExExvrS")['playlists']['items']
-            all_playlists.extend(category_playlists)
+        try:
+            if "throw" in userInputs.spotify_categories:
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFN2GMExExvrS")['playlists']['items']
+                all_playlists.extend(category_playlists)
 
-        if "featured" in userInputs.spotify_categories:
-            category_playlists = sp.featured_playlists(country="GB")
-            all_playlists.extend(category_playlists)
+            if "featured" in userInputs.spotify_categories:
+                featured_playlists = sp.featured_playlists(country="GB")
+                featured_playlist_ids = list(map(lambda x: x['id'], featured_playlists))
+                all_playlists.extend(featured_playlist_ids)
 
-        if "top" in userInputs.spotify_categories:
-            category_playlists = sp.category_playlists(category_id="toplists")['playlists']['items']
-            all_playlists.extend(category_playlists)
+            if "top" in userInputs.spotify_categories:
+                category_playlists = sp.category_playlists(category_id="toplists")['playlists']['items']
+                all_playlists.extend(category_playlists)
 
-        if "hiphop" in userInputs.spotify_categories:
-            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFQ00XGBls6ym")['playlists']['items']
-            all_playlists.extend(category_playlists)
+            if "hiphop" in userInputs.spotify_categories:
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFQ00XGBls6ym")['playlists']['items']
+                all_playlists.extend(category_playlists)
 
-        if "indie" in userInputs.spotify_categories:
-            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFCWjUTdzaG0e")['playlists']['items']
-            all_playlists.extend(category_playlists)
+            if "indie" in userInputs.spotify_categories:
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFCWjUTdzaG0e")['playlists']['items']
+                all_playlists.extend(category_playlists)
 
-        if "mood" in userInputs.spotify_categories:
-            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFzHmL4tf05da")['playlists']['items']
-            all_playlists.extend(category_playlists)
+            if "mood" in userInputs.spotify_categories:
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFzHmL4tf05da")['playlists']['items']
+                all_playlists.extend(category_playlists)
 
-        if "party" in userInputs.spotify_categories:
-            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFA6SOHvT3gck")['playlists']['items']
-            all_playlists.extend(category_playlists)
+            if "party" in userInputs.spotify_categories:
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFA6SOHvT3gck")['playlists']['items']
+                all_playlists.extend(category_playlists)
 
-        if "dance" in userInputs.spotify_categories:
-            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFHOzuVTgTizF")['playlists']['items']
-            all_playlists.extend(category_playlists)
+            if "dance" in userInputs.spotify_categories:
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFHOzuVTgTizF")['playlists']['items']
+                all_playlists.extend(category_playlists)
 
-        if "pop" in userInputs.spotify_categories:
-            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFEC4WFtoNRpw")['playlists']['items']
-            all_playlists.extend(category_playlists)
+            if "pop" in userInputs.spotify_categories:
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFEC4WFtoNRpw")['playlists']['items']
+                all_playlists.extend(category_playlists)
 
-        if "rnb" in userInputs.spotify_categories:
-            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFEZPnFQSFB1T")['playlists']['items']
-            all_playlists.extend(category_playlists)
+            if "rnb" in userInputs.spotify_categories:
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFEZPnFQSFB1T")['playlists']['items']
+                all_playlists.extend(category_playlists)
 
-        if "rock" in userInputs.spotify_categories:
-            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFDXXwE9BDJAr")['playlists']['items']
-            all_playlists.extend(category_playlists)
+            if "rock" in userInputs.spotify_categories:
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFDXXwE9BDJAr")['playlists']['items']
+                all_playlists.extend(category_playlists)
 
-        if "home" in userInputs.spotify_categories:
-            category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFx0uLQR2okcc")['playlists']['items']
-            all_playlists.extend(category_playlists)
+            if "home" in userInputs.spotify_categories:
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFx0uLQR2okcc")['playlists']['items']
+                all_playlists.extend(category_playlists)
+        except Exception as e:
+            logging.error("Error in building spotify categories")
+            logging.error('Error at %s', 'division', exc_info=e)
 
-        # featured_playlist_ids = list(
-        #     map(lambda x: x['id'], featured_playlist_items))
+
 
         # playlists_from_list = []
         # for pid in spotify_playlists:
@@ -118,6 +122,7 @@ def _get_sp_user_playlists(
             )
     except:
         logging.error("Spotify User ID Error")
+
     return playlists
 
 
@@ -183,6 +188,7 @@ def spotify_playlist_sync(
     )
     if playlists:
         for playlist in playlists:
+            time.sleep(1)
             tracks = _get_sp_tracks_from_playlist(
                 sp, userInputs.spotify_user_id, playlist
             )

@@ -12,16 +12,6 @@ from utils.deezer import deezer_playlist_sync
 from utils.helperClasses import UserInputs
 from utils.spotify import spotify_playlist_sync
 
-def start_local_http_server(port, handler=spotipy.oauth2.RequestHandler):
-    server = spotipy.oauth2.HTTPServer(("0.0.0.0", port), handler)
-    server.allow_reuse_address = True
-    server.auth_code = None
-    server.auth_token_form = None
-    server.error = None
-    return server
-
-spotipy.oauth2.start_local_http_server = start_local_http_server
-
 
 # Read ENV variables
 userInputs = UserInputs(
@@ -50,8 +40,9 @@ while True:
     if userInputs.plex_url and userInputs.plex_token:
         try:
             plex = PlexServer(userInputs.plex_url, userInputs.plex_token)
-        except:
+        except Exception as e:
             logging.error("Plex Authorization error")
+            logging.error('Error at %s', 'division', exc_info=e)
             break
     else:
         logging.error("Missing Plex Authorization Variables")
@@ -64,9 +55,9 @@ while True:
     SP_AUTHSUCCESS = False
 
     if (
-            userInputs.spotipy_client_id
-            and userInputs.spotipy_client_secret
-            and userInputs.spotify_user_id
+        userInputs.spotipy_client_id
+        and userInputs.spotipy_client_secret
+        and userInputs.spotify_user_id
     ):
         try:
             sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
