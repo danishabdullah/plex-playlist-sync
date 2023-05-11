@@ -1,4 +1,3 @@
----
 version: "2.1"
 services:
   playlist-sync:
@@ -19,7 +18,6 @@ services:
       - SECONDS_TO_WAIT=86400
       - SPOTIFY_CLIENT_ID=qwertyuiop # Option 1
       - SPOTIFY_CLIENT_SECRET=qwertyuiop # Option 1
-      - SPOTIFY_USER_ID=qwertyuiop # Option 1
       - SPOTIFY_PLAYLIST_IDS=37i9dQZEVXbLnolsZ8PSNw 37i9dQZF1DWVrBRunTOXCY # List of playlist ids
       - SPOTIFY_CATEGORIES=top hiphop # List of categories to add playlists from
     restart: unless-stopped

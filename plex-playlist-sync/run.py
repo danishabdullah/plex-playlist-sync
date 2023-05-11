@@ -6,7 +6,6 @@ import deezer
 import spotipy
 from plexapi.server import PlexServer
 from spotipy.oauth2 import SpotifyClientCredentials
-from spotipy.oauth2 import SpotifyOAuth
 
 from utils.deezer import deezer_playlist_sync
 from utils.helperClasses import UserInputs
@@ -27,7 +26,6 @@ userInputs = UserInputs(
     wait_seconds=int(os.getenv("SECONDS_TO_WAIT", 86400)),
     spotipy_client_id=os.getenv("SPOTIFY_CLIENT_ID"),
     spotipy_client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
-    spotify_user_id=os.getenv("SPOTIFY_USER_ID"),
     spotify_playlist_ids=os.getenv("SPOTIFY_PLAYLIST_IDS"),
     spotify_categories=os.getenv("SPOTIFY_CATEGORIES"),
 )
@@ -57,7 +55,6 @@ while True:
     if (
         userInputs.spotipy_client_id
         and userInputs.spotipy_client_secret
-        and userInputs.spotify_user_id
     ):
         try:
             sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(

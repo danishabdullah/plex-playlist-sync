@@ -1,4 +1,4 @@
-version: "3.1"
+version: "2.1"
 services:
   playlist-sync:
     image: silkychap/plex-playlist-sync:latest
@@ -18,7 +18,6 @@ services:
       - SECONDS_TO_WAIT=84000
       - SPOTIFY_CLIENT_ID=<your spotify client id>
       - SPOTIFY_CLIENT_SECRET=<your spotify client secret>
-      - SPOTIFY_USER_ID=<your spotify user id>
       - SPOTIFY_PLAYLIST_IDS=<spotify playlist ids> # List of playlist ids
       - SPOTIFY_CATEGORIES=<spotify category names> # List of categories to add playlists from
     restart: unless-stopped

@@ -32,7 +32,7 @@ class UserInputs:
 
     spotipy_client_id: str
     spotipy_client_secret: str
-    spotify_user_id: str
+    # spotify_user_id: str
     spotify_playlist_ids: str
     # spotify_user_id_others: str
     spotify_categories: str

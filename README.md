@@ -27,8 +27,6 @@ This DOES NOT download any songs from anywhere.
 
 ### To use Spotify sync
 * Spotify client ID and client secret - Can be obtained from [spotify developer](https://developer.spotify.com/dashboard/login)
-* Spotify user ID - This can be found on spotify [account page](https://www.spotify.com/us/account/overview/)
-* Sportify Redirect Uri - Can just be http://localhost
 
 ### Multiple plex users
 
@@ -73,7 +71,7 @@ version: "2.1"
 services:
   playlistSync:
     image: silkychap/plex-playlist-sync:latest
-    container_name: playlistSync
+    container_name: playlist-sync
     # optional only if you chose WRITE_MISSING_AS_CSV=1 in env
     volumes:
       - <Path where you want to write missing tracks>:/data
@@ -90,8 +88,6 @@ services:
       - SECONDS_TO_WAIT=84000
       - SPOTIFY_CLIENT_ID=<your spotify client id>
       - SPOTIFY_CLIENT_SECRET=<your spotify client secret>
-      - SPOTIFY_USER_ID=<your spotify user id>
-      - SPOTIFY_REDIRECT_URI=http://localhost
       - SPOTIFY_PLAYLIST_IDS=<spotify playlist ids> # List of playlist ids
       - SPOTIFY_CATEGORIES=<spotify category names> # List of categories to add playlists from
     restart: unless-stopped
