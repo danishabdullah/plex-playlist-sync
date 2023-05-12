@@ -34,6 +34,12 @@ You need to get the individual plex tokens for each plex user. To get each one, 
 
 Copy that and add it to the docker `PLEX_TOKEN_USERS` variable.
 
+### Country
+
+You'll need ISO 3166-1 alpha-2 country code to search for the playlist in the region you're in. Found here: https://www.iban.com/country-codes
+
+For example. Hong Kong would be "HK" and United States of America would be "US". 
+
 ### Spotify playlist categories
 
 In addition to adding playlists by their IDs, you can use the categories Spotify define and maintain. For example spotify have a category called "top" which will include playlists like "Global top 50", "Official Charts". Rock will include "Rocktail hour", "Rock Party" etc. Throwback will include "Born in the 90s", "Throwback Thursday". It keeps the playlists fresh and dynamic.
@@ -55,8 +61,6 @@ rnb
 rock
 home
 ```
-
-
 
 ## Docker Setup
 You need either docker or docker with docker-compose to run this. Docker images are available on [the hub](https://hub.docker.com/r/rnagabhyrava/plexplaylistsync/tags) for amd64, arm64 and arm/v7 and will be auto pulled based on your platform.
@@ -90,6 +94,7 @@ services:
       - SPOTIFY_CLIENT_SECRET=<your spotify client secret>
       - SPOTIFY_PLAYLIST_IDS=<spotify playlist ids> # List of playlist ids
       - SPOTIFY_CATEGORIES=<spotify category names> # List of categories to add playlists from
+      - COUNTRY=<spotify country> # Country you would like to query
     restart: unless-stopped
 
 ```

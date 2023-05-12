@@ -37,62 +37,62 @@ def _get_sp_user_playlists(
 
         try:
             if "featured" in userInputs.spotify_categories:
-                featured_playlists = sp.featured_playlists(country="GB")['playlists']['items']
+                featured_playlists = sp.featured_playlists(country=userInputs.country)['playlists']['items']
                 featured_playlist_ids = list(map(lambda x: x['id'], featured_playlists))
                 spotify_playlists = spotify_playlists + featured_playlist_ids
 
             if "throw" in userInputs.spotify_categories:
-                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFN2GMExExvrS")['playlists']['items']
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFN2GMExExvrS", country=userInputs.country)['playlists']['items']
                 category_playlist_ids = list(map(lambda x: x['id'], category_playlists))
                 spotify_playlists = spotify_playlists + category_playlist_ids
 
             if "dance" in userInputs.spotify_categories:
-                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFHOzuVTgTizF")['playlists']['items']
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFHOzuVTgTizF", country=userInputs.country)['playlists']['items']
                 category_playlist_ids = list(map(lambda x: x['id'], category_playlists))
                 spotify_playlists = spotify_playlists + category_playlist_ids
 
             if "top" in userInputs.spotify_categories:
-                category_playlists = sp.category_playlists(category_id="toplists")['playlists']['items']
+                category_playlists = sp.category_playlists(category_id="toplists", country=userInputs.country)['playlists']['items']
                 category_playlist_ids = list(map(lambda x: x['id'], category_playlists))
                 spotify_playlists = spotify_playlists + category_playlist_ids
 
             if "hiphop" in userInputs.spotify_categories:
-                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFQ00XGBls6ym")['playlists']['items']
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFQ00XGBls6ym", country=userInputs.country)['playlists']['items']
                 category_playlist_ids = list(map(lambda x: x['id'], category_playlists))
                 spotify_playlists = spotify_playlists + category_playlist_ids
 
             if "indie" in userInputs.spotify_categories:
-                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFCWjUTdzaG0e")['playlists']['items']
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFCWjUTdzaG0e", country=userInputs.country)['playlists']['items']
                 category_playlist_ids = list(map(lambda x: x['id'], category_playlists))
                 spotify_playlists = spotify_playlists + category_playlist_ids
 
             if "mood" in userInputs.spotify_categories:
-                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFzHmL4tf05da")['playlists']['items']
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFzHmL4tf05da", country=userInputs.country)['playlists']['items']
                 category_playlist_ids = list(map(lambda x: x['id'], category_playlists))
                 spotify_playlists = spotify_playlists + category_playlist_ids
 
             if "party" in userInputs.spotify_categories:
-                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFA6SOHvT3gck")['playlists']['items']
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFA6SOHvT3gck", country=userInputs.country)['playlists']['items']
                 category_playlist_ids = list(map(lambda x: x['id'], category_playlists))
                 spotify_playlists = spotify_playlists + category_playlist_ids
 
             if "pop" in userInputs.spotify_categories:
-                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFEC4WFtoNRpw")['playlists']['items']
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFEC4WFtoNRpw", country=userInputs.country)['playlists']['items']
                 category_playlist_ids = list(map(lambda x: x['id'], category_playlists))
                 spotify_playlists = spotify_playlists + category_playlist_ids
 
             if "rnb" in userInputs.spotify_categories:
-                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFEZPnFQSFB1T")['playlists']['items']
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFEZPnFQSFB1T", country=userInputs.country)['playlists']['items']
                 category_playlist_ids = list(map(lambda x: x['id'], category_playlists))
                 spotify_playlists = spotify_playlists + category_playlist_ids
 
             if "rock" in userInputs.spotify_categories:
-                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFDXXwE9BDJAr")['playlists']['items']
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFDXXwE9BDJAr", country=userInputs.country)['playlists']['items']
                 category_playlist_ids = list(map(lambda x: x['id'], category_playlists))
                 spotify_playlists = spotify_playlists + category_playlist_ids
 
             if "home" in userInputs.spotify_categories:
-                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFx0uLQR2okcc")['playlists']['items']
+                category_playlists = sp.category_playlists(category_id="0JQ5DAqbMKFx0uLQR2okcc", country=userInputs.country)['playlists']['items']
                 category_playlist_ids = list(map(lambda x: x['id'], category_playlists))
                 spotify_playlists = spotify_playlists + category_playlist_ids
         except Exception as e:
@@ -102,7 +102,7 @@ def _get_sp_user_playlists(
 
         playlists_from_list = []
         for pid in spotify_playlists:
-            p = sp.playlist(playlist_id=pid, market='GB')
+            p = sp.playlist(playlist_id=pid, market=userInputs.country)
             playlists_from_list.append(p)
 
         if len(spotify_playlists) > 0:

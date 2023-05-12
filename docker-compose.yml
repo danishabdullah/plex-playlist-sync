@@ -20,4 +20,5 @@ services:
       - SPOTIFY_CLIENT_SECRET=<your spotify client secret>
       - SPOTIFY_PLAYLIST_IDS=<spotify playlist ids> # List of playlist ids
       - SPOTIFY_CATEGORIES=<spotify category names> # List of categories to add playlists from
+      - COUNTRY=<your spotify country>
     restart: unless-stopped

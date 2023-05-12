@@ -20,4 +20,5 @@ services:
       - SPOTIFY_CLIENT_SECRET=qwertyuiop # Option 1
       - SPOTIFY_PLAYLIST_IDS=37i9dQZEVXbLnolsZ8PSNw 37i9dQZF1DWVrBRunTOXCY # List of playlist ids
       - SPOTIFY_CATEGORIES=top hiphop # List of categories to add playlists from
+      - COUNTRY=US
     restart: unless-stopped

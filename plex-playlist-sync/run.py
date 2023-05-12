@@ -28,6 +28,7 @@ userInputs = UserInputs(
     spotipy_client_secret=os.getenv("SPOTIFY_CLIENT_SECRET"),
     spotify_playlist_ids=os.getenv("SPOTIFY_PLAYLIST_IDS"),
     spotify_categories=os.getenv("SPOTIFY_CATEGORIES"),
+    country=os.getenv("COUNTRY"),
 )
 
 scope = "user-library-read playlist-read-private user-follow-read"
@@ -55,6 +56,7 @@ while True:
     if (
         userInputs.spotipy_client_id
         and userInputs.spotipy_client_secret
+        and userInputs.country
     ):
         try:
             sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(
