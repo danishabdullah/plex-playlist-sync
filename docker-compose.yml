@@ -3,12 +3,17 @@ services:
   playlistSync:
     image: dregsozworld/plex_playlist_sync
     container_name: playlistSync
-
+    ports:
+      - "8888:8888/tcp"
     volumes:
       - <directory where csv stored>:/data
+      - <directory to store spotify keys>:/caches
     environment:
       - PLEX_URL= <Your local plex url>
       - PLEX_TOKEN=<Your token>
+      - PLEX_USERNAME=<Username / email for your Plex Account>
+      - PLEX_PASSWORD=<Password for your Plex Account>
+      - SERVER_NAME=<Name for your plex server ie plex>
       - WRITE_MISSING_AS_CSV=<1 | 0 >
       - APPEND_SERVICE_SUFFIX= <1 | 0>
       - ADD_PLAYLIST_POSTER= ><1 | 0 >
@@ -16,8 +21,9 @@ services:
       - APPEND_INSTEAD_OF_SYNC= <1 | 0 >
       - SECONDS_TO_WAIT=43200  #12 Hours Default
       - SPOTIFY_CLIENT_ID= <Your ID>
+      - SPOTIFY_REDIRECT_URI=http://localhost:8888/callback #DO NOT CHANGE
       - SPOTIFY_CLIENT_SECRET= <Your Secret>
-      - SPOTIFY_USER_ID= <Your ID / Username >
+      - SPOTIFY_USER_ID= <Your ID / Username > # Do not need anymore
       - DEEZER_USER_ID=<your spotify user id>
       - DEEZER_PLAYLIST_ID= # multiple playlists are space separated
     restart: unless-stopped

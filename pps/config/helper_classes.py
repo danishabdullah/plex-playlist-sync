@@ -21,6 +21,9 @@ class Playlist:
 class UserInputs:
     plex_url: str
     plex_token: str
+    plex_username: str
+    plex_password: str
+    server_name: str
 
     write_missing_as_csv: bool
     append_service_suffix: bool
@@ -29,9 +32,10 @@ class UserInputs:
     append_instead_of_sync: bool
     wait_seconds: int
 
-    spotipy_client_id: str
-    spotipy_client_secret: str
+    spotify_client_id: str
+    spotify_client_secret: str
     spotify_user_id: str
+    spotify_redirect_uri: str
 
     deezer_user_id: str
     deezer_playlist_ids: str

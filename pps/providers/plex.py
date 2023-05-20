@@ -8,11 +8,50 @@ from typing import List
 
 import plexapi
 from plexapi.exceptions import BadRequest, NotFound, Unauthorized
+from plexapi.myplex import MyPlexAccount
 from plexapi.server import PlexServer
 
-from .helperClasses import Playlist, Track, UserInputs
+from pps.config.helper_classes import Playlist, Track, UserInputs
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+
+
+def connect_to_plex(user_inputs):
+    if all((user_inputs.plex_username, user_inputs.plex_password, user_inputs.server_name)):
+        try:
+            account, plex = connect_via_pass(user_inputs.plex_username, user_inputs.plex_password,
+                                             user_inputs.server_name)
+        except Exception as e:
+            logging.info(f"Connecting with password failed: {e}")
+            plex = connect_via_token(user_inputs.plex_url, user_inputs.plex_token)
+    elif user_inputs.plex_url and user_inputs.plex_token:
+        plex = connect_via_token(user_inputs.plex_url, user_inputs.plex_token)
+    else:
+        logging.error("Missing Plex Authorization Variables")
+        raise ValueError("Missing Plex Authorization Variables")
+
+    return plex
+
+
+def connect_via_pass(username, password, server_name):
+    try:
+        plex_account = MyPlexAccount(username, password, timeout=60)
+        server = plex_account.resource(server_name).connect(timeout=60)
+        return plex_account, server
+    except Exception as e:
+        logging.error("Plex Authorization error")
+        logging.exception(e)
+        raise
+
+
+def connect_via_token(url, token):
+    try:
+        plex = PlexServer(url, token, timeout=60)
+        return plex
+    except Exception as e:
+        logging.error("Plex Authorization error")
+        logging.exception(e)
+        raise
 
 
 def _write_csv(tracks: List[Track], name: str, path: str = "/data") -> None:
@@ -114,10 +153,10 @@ def _get_available_plex_tracks(plex: PlexServer, tracks: List[Track]) -> (List[T
 
 
 def _update_plex_playlist(
-    plex: PlexServer,
-    available_tracks: List,
-    playlist: Playlist,
-    append: bool = False,
+        plex: PlexServer,
+        available_tracks: List,
+        playlist: Playlist,
+        append: bool = False,
 ) -> plexapi.playlist.Playlist:
     """Update existing plex playlist with new tracks and metadata.
 
@@ -138,10 +177,10 @@ def _update_plex_playlist(
 
 
 def update_or_create_plex_playlist(
-    plex: PlexServer,
-    playlist: Playlist,
-    tracks: List[Track],
-    user_inputs: UserInputs,
+        plex: PlexServer,
+        playlist: Playlist,
+        tracks: List[Track],
+        user_inputs: UserInputs,
 ) -> None:
     """Update playlist if exists, else create a new playlist.
 
