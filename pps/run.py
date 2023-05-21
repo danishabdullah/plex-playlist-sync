@@ -35,12 +35,13 @@ def run():
 
     # Setup logging
     setup_logging()
+    logging.getLogger(__name__)
 
     # Create cache directory
     os.makedirs(CACHE_DIR, exist_ok=True)
 
     # Start flask callback server
-    app_thread = threading.Thread(target=spotify_callback.app.run, kwargs={'host': '0.0.0.0', 'port': 8888})
+    app_thread = threading.Thread(target=spotify_callback.start_callback_server)
     app_thread.start()
 
     # Body Loop

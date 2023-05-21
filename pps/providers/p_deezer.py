@@ -9,6 +9,9 @@ from pps.config.helper_classes import Playlist, Track, UserInputs
 from pps.providers.plex import update_or_create_plex_playlist
 
 
+logging.getLogger(__name__)
+
+
 def _get_dz_playlists(
         dz: deezer.Client(),
         userInputs: UserInputs,

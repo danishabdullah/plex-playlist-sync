@@ -13,7 +13,7 @@ from plexapi.server import PlexServer
 
 from pps.config.helper_classes import Playlist, Track, UserInputs
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.getLogger(__name__)
 
 
 def connect_to_plex(user_inputs):
@@ -29,14 +29,16 @@ def connect_to_plex(user_inputs):
     else:
         logging.error("Missing Plex Authorization Variables")
         raise ValueError("Missing Plex Authorization Variables")
-
+    logging.info("Successfully connected to Plex Server")
     return plex
 
 
 def connect_via_pass(username, password, server_name):
     try:
         plex_account = MyPlexAccount(username, password, timeout=60)
+        logging.info(f"Got Plex Account, looking for Server: {server_name}")
         server = plex_account.resource(server_name).connect(timeout=60)
+        logging.info(f"Found {server_name}")
         return plex_account, server
     except Exception as e:
         logging.error("Plex Authorization error")
@@ -46,6 +48,7 @@ def connect_via_pass(username, password, server_name):
 
 def connect_via_token(url, token):
     try:
+        logging.info("Connecting to Local Server with Token")
         plex = PlexServer(url, token, timeout=60)
         return plex
     except Exception as e:

@@ -11,6 +11,8 @@ from pps.providers import spotify_callback
 
 from pps import SPOTIFY_TOKEN_CACHE_PATH
 
+logging.getLogger(__name__)
+
 
 def connect_to_spotify(user_inputs):
     cache_handler = CacheFileHandler(cache_path=SPOTIFY_TOKEN_CACHE_PATH)
@@ -33,8 +35,8 @@ def connect_to_spotify(user_inputs):
         logging.info("Got a code!")
         token_info = auth_manager.get_access_token(code)
 
-    print('Good')
     sp = spotipy.Spotify(auth_manager=auth_manager)
+    logging.info("Successfully connected to Spotify Account")
     return sp
 
 

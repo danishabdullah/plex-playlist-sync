@@ -5,18 +5,18 @@ Create spotify and deezer playlists in your plex account using tracks from your 
 This DOES NOT download any songs from anywhere.
 
 ## Features
-* From Spotify: Sync all of the given user account's playlists to plex
-* From Deezer: Sync all of the given user account's public playlists and/or any given public playlist IDs to plex
+* From Spotify: Sync all the given user account's playlists to plex
+* From Deezer: Sync all the given user account's public playlists and/or any given public playlist IDs to plex
 * --- New ---
 * Option to write missing songs as a csv
 * Option to include poster and description in playlists.
 
 ## Prerequisites
 ### Plex
-* Use:
+* Use Plex Credentials (**Requires You to have Remote Access on your Plex Server**):
   * Plex Username and Password
   * Plex Server Name you wish to sync with 
-* Or:
+* Or Use Local IP and Token (**Rquires you to be connected to the same network as the plex server**):
     * Plex server's host and port
     * Plex token - [Don't know where to find it?](https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/)
 
@@ -71,7 +71,7 @@ docker run -d \
 #### Notes
 - Include `http://` in the PLEX_URL
 - Remove comments (ex: `# Optional x`) before running 
-- Do  Not change spotify_redirect_url pls
+- Do Not change spotify_redirect_url pls
 
 ### Docker Compose
 
