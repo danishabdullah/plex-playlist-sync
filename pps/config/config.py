@@ -1,6 +1,6 @@
 import os
 
-from pps.config.helper_classes import UserInputs
+from pps.config.helpers import UserInputs
 
 PLEX_URL = os.getenv("PLEX_URL")
 PLEX_TOKEN = os.getenv("PLEX_TOKEN")

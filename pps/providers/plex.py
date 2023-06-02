@@ -11,7 +11,7 @@ from plexapi.exceptions import BadRequest, NotFound, Unauthorized
 from plexapi.myplex import MyPlexAccount
 from plexapi.server import PlexServer
 
-from pps.config.helper_classes import Playlist, Track, UserInputs
+from pps.config.helpers import Playlist, Track, UserInputs
 
 logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def connect_via_pass(username, password, server_name):
         plex_account = MyPlexAccount(username, password, timeout=60)
         logging.info(f"Got Plex Account, looking for Server: {server_name}")
         server = plex_account.resource(server_name).connect(timeout=60)
-        logging.info(f"Found {server_name}")
+        logging.info(f"Found Server {server_name}: {server}")
         return plex_account, server
     except Exception as e:
         logging.error("Plex Authorization error")
@@ -110,18 +110,22 @@ def _get_available_plex_tracks(plex: PlexServer, tracks: List[Track]) -> (List[T
     for track in tracks:
         search = []
         try:
-            search = plex.search(track.title, mediatype="track", limit=5)
+            title_comp = track.title
+            logging.info(f"Searching Plex server for {title_comp}")
+            search = plex.search(title_comp, mediatype="track", limit=15)
         except NotFound:
             logging.info(f"{track.title} not found on plex server")
         except BadRequest:
             logging.info(f"failed to search {track.title} on plex")
         if (not search) or len(track.title.split("(")) > 1:
-            logging.info("retrying search for %s", track.title)
+            title_comp = track.title.split("(")[0]
+            logging.info(f"Retrying search for {track.title} as {title_comp}")
             try:
                 search += plex.search(
-                    track.title.split("(")[0], mediatype="track", limit=5
+                    title_comp, mediatype="track", limit=15
                 )
-                logging.info(f"search for {track.title} successful")
+                if search:
+                    logging.info(f"search for {title_comp} found candidates")
             except BadRequest:
                 logging.info(f"unable to query {track.title} on plex")
 
@@ -136,6 +140,8 @@ def _get_available_plex_tracks(plex: PlexServer, tracks: List[Track]) -> (List[T
                     if artist_similarity >= 0.9:
                         plex_tracks.extend(s)
                         found = True
+                        logging.info(
+                            f"Found Track in Plex Server: {s.title} by {s.artist().title} in {s.album().title}")
                         break
 
                     album_similarity = SequenceMatcher(
@@ -145,11 +151,17 @@ def _get_available_plex_tracks(plex: PlexServer, tracks: List[Track]) -> (List[T
                     if album_similarity >= 0.9:
                         plex_tracks.extend(s)
                         found = True
+                        logging.info(
+                            f"Found Track in Plex Server: {s.title} by {s.artist().title} in {s.album().title}")
                         break
+                    else:
+                        logging.info(f"Track similarity is less than 90%: {track.title} by {track.artist}"
+                                     f" in {track.album} vs {s.title} by {s.artist().title} in {s.album().title}")
 
                 except IndexError:
                     logging.info(f"Looks like plex mismatched {track.title}, retrying with next result")
         if not found:
+            logging.info(f"No suitable match found for {track.title} in Plex")
             missing_tracks.append(track)
 
     return plex_tracks, missing_tracks
@@ -193,6 +205,7 @@ def update_or_create_plex_playlist(
         plex (PlexServer): A configured PlexServer instance
         playlist (Playlist): Playlist object
     """
+    logging.info(f"Starting sync for {playlist.name}")
     available_tracks, missing_tracks = _get_available_plex_tracks(plex, tracks)
     if available_tracks:  # Set up playlist with Tracks
         try:
@@ -253,3 +266,4 @@ def update_or_create_plex_playlist(
             logging.warning(str(e))
         except Exception as e:
             logging.exception(e)
+    logging.info(f"Sync finished for {playlist.name}")

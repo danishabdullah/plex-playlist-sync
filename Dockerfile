@@ -4,7 +4,7 @@ ENV PYTHONUNBUFFERED 1
 
 COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip
-RUN pip install spotipy flask deezer-python plexapi gevent
+RUN pip install spotipy flask deezer-python plexapi gevent requests
 
 WORKDIR /app
 COPY pps /app/pps

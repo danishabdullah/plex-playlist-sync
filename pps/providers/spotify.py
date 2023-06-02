@@ -1,17 +1,21 @@
 import logging
+import random
+import time
 from typing import List
 
 import spotipy
 from plexapi.server import PlexServer
-from spotipy import CacheFileHandler, SpotifyOAuth
+from spotipy import CacheFileHandler, SpotifyOAuth, SpotifyException
+from urllib3.exceptions import ProtocolError
 
-from pps.config.helper_classes import Playlist, Track, UserInputs
+from pps.config.helpers import Playlist, Track, UserInputs, retry_with_backoff
 from pps.providers.plex import update_or_create_plex_playlist
 from pps.providers import spotify_callback
 
 from pps import SPOTIFY_TOKEN_CACHE_PATH
 
 logging.getLogger(__name__)
+
 
 
 def connect_to_spotify(user_inputs):
@@ -28,7 +32,6 @@ def connect_to_spotify(user_inputs):
         cache_handler=cache_handler
     )
     if not token_info or not all((token_info.get('access_token'), token_info.get('refresh_token'))):
-
         auth_url = auth_manager.get_authorize_url()
         print(f"Use the following link to authenticate your account: {auth_url}")
         code = spotify_callback.access_code_queue.get()
@@ -40,6 +43,7 @@ def connect_to_spotify(user_inputs):
     return sp
 
 
+@retry_with_backoff
 def get_sp_user_playlists(spotify: spotipy.Spotify, suffix: str = " - Spotify") -> List[Playlist]:
     """Get metadata for playlists in the given user_id.
 
@@ -66,6 +70,7 @@ def get_sp_user_playlists(spotify: spotipy.Spotify, suffix: str = " - Spotify") 
     return playlists
 
 
+@retry_with_backoff
 def get_sp_tracks_from_playlist(spotify: spotipy.Spotify, playlist: Playlist) -> List[Track]:
     """Return list of tracks with metadata.
 
@@ -93,6 +98,8 @@ def get_sp_tracks_from_playlist(spotify: spotipy.Spotify, playlist: Playlist) ->
             tracks.extend(extract_sp_track_metadata(i) for i in sp_playlist_tracks["items"] if i.get("track"))
     except spotipy.SpotifyException as e:
         logging.error(f"Failed getting tracks: {e}")
+    except Exception:
+        raise
     return tracks
 
 

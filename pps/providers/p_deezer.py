@@ -5,7 +5,7 @@ from plexapi.server import PlexServer
 
 import deezer as deezer
 
-from pps.config.helper_classes import Playlist, Track, UserInputs
+from pps.config.helpers import Playlist, Track, UserInputs
 from pps.providers.plex import update_or_create_plex_playlist
 
 
