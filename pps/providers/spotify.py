@@ -8,14 +8,13 @@ from plexapi.server import PlexServer
 from spotipy import CacheFileHandler, SpotifyOAuth, SpotifyException
 from urllib3.exceptions import ProtocolError
 
-from pps.config.helpers import Playlist, Track, UserInputs, retry_with_backoff
+from pps.config.helpers import Playlist, Track, UserInputs, retry_with_backoff, wait_for_connection
 from pps.providers.plex import update_or_create_plex_playlist
 from pps.providers import spotify_callback
 
 from pps import SPOTIFY_TOKEN_CACHE_PATH
 
 logging.getLogger(__name__)
-
 
 
 def connect_to_spotify(user_inputs):
@@ -28,7 +27,7 @@ def connect_to_spotify(user_inputs):
         redirect_uri=user_inputs.spotify_redirect_uri,
         show_dialog=False,
         open_browser=False,
-        scope='playlist-read-private,playlist-read-collaborative,user-library-read',
+        scope='playlist-read-private,playlist-read-collaborative,user-library-read,user-read-private',
         cache_handler=cache_handler
     )
     if not token_info or not all((token_info.get('access_token'), token_info.get('refresh_token'))):
@@ -44,6 +43,27 @@ def connect_to_spotify(user_inputs):
 
 
 @retry_with_backoff
+@wait_for_connection
+def get_my_daily_mixes(spotify: spotipy.Spotify, daily_mixes: list[str], suffix: str = " - Spotify") -> list[Playlist]:
+    playlists = []
+    try:
+        for mix in daily_mixes:
+            playlist = spotify.playlist(mix)
+            playlists.append(
+                Playlist(
+                    id=playlist["uri"],
+                    name=playlist["name"] + suffix,
+                    description=playlist.get("description", ""),
+                    poster="" if not playlist["images"] else playlist["images"][0].get("url", ""),
+                )
+            )
+    except spotipy.SpotifyException as e:
+        logging.error(f"Failed getting playlists: {e}")
+    return playlists
+
+
+@retry_with_backoff
+@wait_for_connection
 def get_sp_user_playlists(spotify: spotipy.Spotify, suffix: str = " - Spotify") -> List[Playlist]:
     """Get metadata for playlists in the given user_id.
 
@@ -65,13 +85,25 @@ def get_sp_user_playlists(spotify: spotipy.Spotify, suffix: str = " - Spotify") 
                     poster="" if not playlist["images"] else playlist["images"][0].get("url", ""),
                 )
             )
+        while sp_playlists.get('next'):
+            sp_playlists = spotify.next(sp_playlists)
+            for playlist in sp_playlists["items"]:
+                playlists.append(
+                    Playlist(
+                        id=playlist["uri"],
+                        name=playlist["name"] + suffix,
+                        description=playlist.get("description", ""),
+                        poster="" if not playlist["images"] else playlist["images"][0].get("url", ""),
+                    )
+                )
     except spotipy.SpotifyException as e:
         logging.error(f"Failed getting playlists: {e}")
     return playlists
 
 
 @retry_with_backoff
-def get_sp_tracks_from_playlist(spotify: spotipy.Spotify, playlist: Playlist) -> List[Track]:
+@wait_for_connection
+def get_sp_tracks_from_playlist(spotify: spotipy.Spotify, playlist: Playlist) -> list[Track]:
     """Return list of tracks with metadata.
 
     Args:
@@ -116,6 +148,8 @@ def spotify_playlist_sync(spotify: spotipy.Spotify, plex: PlexServer, user_input
     """
 
     playlists = get_sp_user_playlists(spotify, " - Spotify" if user_inputs.append_service_suffix else "", )
+    playlists.extend(get_my_daily_mixes(spotify, user_inputs.spotify_daily_mixes,
+                                        " - Spotify" if user_inputs.append_service_suffix else ""))
     if playlists:
         for playlist in playlists:
             tracks = get_sp_tracks_from_playlist(spotify, playlist)

@@ -17,6 +17,7 @@ SPOTIFY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIFY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 SPOTIFY_USER_ID = os.getenv("SPOTIFY_USER_ID")
 SPOTIFY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
+SPOTIFY_DAILY_MIXES = os.getenv("SPOTIFY_DAILY_MIXES").split(",")
 DEEZER_USER_ID = os.getenv("DEEZER_USER_ID")
 DEEZER_PLAYLIST_ID = os.getenv("DEEZER_PLAYLIST_ID")
 
@@ -38,6 +39,7 @@ def get_environment_variables():
         spotify_client_secret=SPOTIFY_CLIENT_SECRET,
         spotify_user_id=SPOTIFY_USER_ID,
         spotify_redirect_uri=SPOTIFY_REDIRECT_URI,
+        spotify_daily_mixes=SPOTIFY_DAILY_MIXES,
         deezer_user_id=DEEZER_USER_ID,
         deezer_playlist_ids=DEEZER_PLAYLIST_ID,
     )

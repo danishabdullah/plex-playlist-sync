@@ -24,6 +24,7 @@ services:
       - SPOTIFY_REDIRECT_URI=http://localhost:8888/callback #DO NOT CHANGE
       - SPOTIFY_CLIENT_SECRET= <Your Secret>
       - SPOTIFY_USER_ID= <Your ID / Username > # Do not need anymore
+      - SPOTIFY_DAILY_MIXES= <Comma separated list of playlist ids to sync>
       - DEEZER_USER_ID=<your spotify user id>
       - DEEZER_PLAYLIST_ID= # multiple playlists are space separated
     restart: unless-stopped

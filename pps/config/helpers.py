@@ -44,6 +44,7 @@ class UserInputs:
     spotify_client_secret: str
     spotify_user_id: str
     spotify_redirect_uri: str
+    spotify_daily_mixes: list[str]
 
     deezer_user_id: str
     deezer_playlist_ids: str
@@ -71,5 +72,23 @@ def retry_with_backoff(func):
                     logger.info(f"Retrying in {delay:.2f} seconds...")
                     time.sleep(delay)
                     delay_range = (delay_range[0] ** 2, delay_range[1] ** 2)
+
+    return wrapper
+
+
+def wait_for_connection(func):
+    """Decorator function to wait for a connection to be established."""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        while True:
+            try:
+                val = func(*args, **kwargs)
+                return val
+            except (ConnectionError, ProtocolError, RemoteDisconnected) as ce:
+                logger = logging.getLogger(func.__module__)  # Use the module name as the logger name
+                logger.error(f"ConnectionError occurred: {ce}")
+                logger.info("Retrying in 5 seconds...")
+                time.sleep(5)
 
     return wrapper

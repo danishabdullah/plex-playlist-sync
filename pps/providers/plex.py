@@ -10,8 +10,9 @@ import plexapi
 from plexapi.exceptions import BadRequest, NotFound, Unauthorized
 from plexapi.myplex import MyPlexAccount
 from plexapi.server import PlexServer
+from plexapi.playlist import Playlist as PlexPlaylist
 
-from pps.config.helpers import Playlist, Track, UserInputs
+from pps.config.helpers import Playlist, Track, UserInputs, retry_with_backoff, wait_for_connection
 
 logging.getLogger(__name__)
 
@@ -94,6 +95,8 @@ def _delete_csv(name: str, path: str = "/data") -> None:
     file.unlink()
 
 
+@retry_with_backoff
+@wait_for_connection
 def _get_available_plex_tracks(plex: PlexServer, tracks: List[Track]) -> (List[Track], List[Track]):
     """Search and return list of tracks available in plex.
 
@@ -167,12 +170,14 @@ def _get_available_plex_tracks(plex: PlexServer, tracks: List[Track]) -> (List[T
     return plex_tracks, missing_tracks
 
 
+@retry_with_backoff
+@wait_for_connection
 def _update_plex_playlist(
         plex: PlexServer,
         available_tracks: List,
         playlist: Playlist,
         append: bool = False,
-) -> plexapi.playlist.Playlist:
+) -> PlexPlaylist:
     """Update existing plex playlist with new tracks and metadata.
 
     Args:
@@ -219,7 +224,7 @@ def update_or_create_plex_playlist(
         except NotFound:
             plex.createPlaylist(title=playlist.name, items=available_tracks)
             logging.info(f"Created playlist  {playlist.name}")
-            plex_playlist = plex.playlist(playlist.name)
+            plex_playlist: PlexPlaylist = plex.playlist(playlist.name)  # plexapi.playlist.Playlist
 
         if playlist.description and user_inputs.add_playlist_description:
             try:
