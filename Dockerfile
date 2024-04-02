@@ -1,15 +1,15 @@
-FROM python:3.8-alpine
+FROM python:3.10-alpine
 
 ENV PYTHONUNBUFFERED 1
 
-WORKDIR /app
-
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install spotipy flask deezer-python plexapi gevent requests
 
-COPY . .
 WORKDIR /app
+COPY pps /app/pps
 
-CMD ["python", "usage.py"]
+CMD ["python", "-m", "pps.run"]
 
-# docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t rnagabhyrava/plexplaylistsync:<tag> --push .
+
+#docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t rnagabhyrava/plexplaylistsync:<tag> --push .
