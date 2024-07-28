@@ -1,0 +1,76 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Docker Build and Publish
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the main branch
+on:
+  pull_request:
+    branches: [ master ] 
+  push:
+    branches: [ master ]
+  workflow_dispatch: 
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build_and_push:
+    name: Build, tag, and push images
+    strategy:
+        fail-fast: true
+
+    runs-on: ubuntu-latest 
+
+    steps:
+
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - 
+        uses: actions/checkout@v4
+
+    # Setup QEMU for multi-arch
+    - 
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+    # setup buildx to use qemu during build
+    - 
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+    # Generate tags & labels for build
+    -
+        name: Docker meta
+        id: meta-default
+        uses: docker/metadata-action@v5
+        with:
+            images: |
+                ghcr.io/${{ github.repository_owner }}/plexplaylistsync
+            flavor: |
+                latest=true
+            tags: |
+                # Version only
+                type=semver,pattern={{major}}
+                type=semver,pattern={{major}}.{{minor}}
+                type=semver,pattern={{version}}
+
+                type=ref,event=branch
+
+    -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
+        with:
+            registry: ghcr.io
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+
+    # Build the container, tag, & push
+    -
+        name: Build container
+        uses: docker/build-push-action@v5
+        with:
+            context: .
+            file: ./Dockerfile
+            platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6,linux/s390x
+            push: ${{ github.event_name != 'pull_request' }}
+            tags: ${{ steps.meta-default.outputs.tags }}
+            labels: ${{ steps.meta-default.outputs.labels }}
