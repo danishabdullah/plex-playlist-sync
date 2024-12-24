@@ -1,14 +1,15 @@
----
 version: "2.1"
 services:
-  playlistSync:
-    image: rnagabhyrava/plexplaylistsync:latest
-    container_name: playlistSync
+  playlist-sync:
+    image: silkychap/plex-playlist-sync:latest
+    container_name: playlist-sync
     volumes:
       - ~/missing_tracks:/data
     environment:
       - PLEX_URL=http://192.99.99.99:32400
-      - PLEX_TOKEN=qwertyuiop
+      - PLEX_TOKEN=qwertyuiop # Owners/Primary user's plex token
+      - PLEX_TOKEN_USERS=qwertyuiop qwertyuiop # Other managed user's plex tokens
+      - PLEX_MIN_SONGS=20 # Minimum number of songs for a playlist to be created
       - WRITE_MISSING_AS_CSV=1 # If you want to write missing
       - APPEND_SERVICE_SUFFIX=1 # If you want to append service name to playlist name (e.g., " - Spotify")
       - ADD_PLAYLIST_POSTER=1 # If you want to add posters for playlists
@@ -17,7 +18,7 @@ services:
       - SECONDS_TO_WAIT=86400
       - SPOTIFY_CLIENT_ID=qwertyuiop # Option 1
       - SPOTIFY_CLIENT_SECRET=qwertyuiop # Option 1
-      - SPOTIFY_USER_ID=qwertyuiop # Option 1
-      - DEEZER_USER_ID=9999999999 # Option 2
-      - DEEZER_PLAYLIST_ID=1313621735 1963962142 # Option 3
+      - SPOTIFY_PLAYLIST_IDS=37i9dQZEVXbLnolsZ8PSNw 37i9dQZF1DWVrBRunTOXCY # List of playlist ids
+      - SPOTIFY_CATEGORIES=top hiphop # List of categories to add playlists from
+      - COUNTRY=US
     restart: unless-stopped
